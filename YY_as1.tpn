@@ -1,0 +1,69 @@
+place P"0" init 1;
+place "P1";
+place "P2";
+place "P3;
+place "P4;
+place "P5;
+place "P6";
+place "P7;
+place "P8";
+place "P9";
+place "P10";
+place "P11";
+place "P12;
+place "P13";
+place "P14";
+trans "T1"~"intention to participate night run"
+   in "P0";
+   out "P1";
+trans "T2"~"select starting block"
+   in "P1";
+   out "P2";
+trans "T3"~"start timer"
+   in "P2";
+   out "P3";
+trans "T4"~"run 5km"
+   in "P3";
+   out "P4";
+trans "T5"~"end timer"
+   in "P4";
+   out "P5";
+trans "T6"~"get running time"
+   in "P5";
+   out "P6";
+trans "T7"~"get starting #"
+   in "P6";
+   out "P7";
+trans "T8"~"end of work time - night run start time "
+   in "P7";
+   out "P8";
+trans "T9"~"go from home"
+   in "P8";
+   out "P9";
+trans "T10"~"start timer"
+   in "P9";
+   out "P10";
+trans "T11"~"drink"
+   in "P10";
+   out "P11";
+trans "T12"~"end timer"
+   in "P11";
+   out "P12";
+trans "T13"~"get running time"
+   in "P12";
+   out "P13";
+trans "T14"~""artificial transition""
+   in "P13";
+   out "P14";
+trans "T15"~"run"
+   in "P10";
+   out "P11";
+trans "T16"~"leave directly form work"
+   in "P8";
+   out "P9";
+trans "T17"~""artificail transition""
+   in "P6";
+   out "P2";
+trans "T18"~""artificail transition""
+   in "P1";
+   out "P13";
