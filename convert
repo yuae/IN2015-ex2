@@ -124,7 +124,7 @@ def traverse(curr, places, pTable, transitions, gates, tasks, edges):
 		for n in next:
 			[nGate, nItem]  = determineType(n, gates, tasks)
 			if nGate:
-				transitions.append({'id':'atrans'+str(atrans), 'index':str(t_count), 'label':'"artificial transition"', 'in':curr.get('id'), 'out':nItem.get('id')})
+				transitions.append({'id':'atrans'+str(atrans), 'index':str(t_count), 'label':'artificial transition', 'in':curr.get('id'), 'out':nItem.get('id')})
 				atrans+=1
 				t_count+=1	
 			traverse(nItem, places, pTable, transitions, gates, tasks, edges)
