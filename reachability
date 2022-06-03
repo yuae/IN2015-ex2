@@ -15,25 +15,27 @@ l4 = []
 def getStrInQuote(str):
 	#print(str)
 	text = re.findall('"(.+?)"', str)
-	return text[0]
+	#print(text)
+	return text
 
 def fileParse(file):
 	pTable = []
 	tTable = []
-	transition = []	
+	trans = []	
 	i = []
 	o = []
 	file = open(file)
 	for line in file:
-		text = line.rstrip()
-		if 'place' in text:
-			pTable.append(getStrInQuote(text))
-		if 'trans' in text:
+		if 'place' in line.rstrip():
+			pTable.append(getStrInQuote(line)[0])
+		if 'trans' in line.rstrip():
 			trans = line[:-1].split('~')
-			print(trans[0])
-			print(trans[1])
-			i = getStrInQuote(file.readline().rstrip())
-			o = getStrInQuote(file.readline().rstrip())
+			#print(trans[0])
+			#print(trans[1])
+		if 'in' in line.rstrip():
+			i = getStrInQuote(line)[0]
+		if 'out' in line.rstrip():
+			o = getStrInQuote(line)[0]
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
 	return pTable, tTable
 
@@ -163,7 +165,7 @@ def reachabilityAnalysis(file):
 	pTable, tTable = fileParse(file)
 
 	for t in tTable:
-		print('trans '+t[0]+' ... '+t[1])
+		print('trans '+str(t[0])+' ... '+str(t[1]))
 	
 	print()
 
