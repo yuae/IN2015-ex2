@@ -13,7 +13,12 @@ l3 = []
 l4 = []
 
 def getStrInQuote(str):
-	return re.search('"(.+?)"', str).group(1)
+	#print(str)
+	text = re.search('"(.+?)"', str)
+	if text is None:
+		return ''
+	else:
+		return text.group(1)
 
 def fileParse(file):
 	pTable = []
