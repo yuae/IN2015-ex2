@@ -1,0 +1,196 @@
+#!/usr/bin/python3
+
+import sys
+import re
+
+pTable = []
+tTable = []
+mTable = []
+mIndex = 0
+l1 = []
+l2 = []
+l3 = []
+l4 = []
+
+def getStrInQuote(str):
+	return re.search('"(.+?)"', str).group(1)
+
+def fileParse(file):
+	pTable = []
+	tTable = []
+	transition = []	
+	i = []
+	o = []
+	file = open(file)
+	for line in file:
+		text = line.rstrip()
+		if 'place' in text:
+			pTable.append(getStrInQuote(text))
+		if 'trans' in text:
+			trans = line[:-1].split('~')
+			i = getStrInQuote(file.readline().rstrip())
+			o = getStrInQuote(file.readline().rstrip())
+			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
+	return pTable, tTable
+
+def liveLevelCheck(trans):
+	if len(trans[2])==1 and len(trans[3])==1:
+		l1.append(trans[0])
+	if len(trans[2])>1 and len(trans[3])==1:
+		l2.append(trans[0])
+	if len(trans[2])==1 and len(trans[3])>1:
+		l3.append(trans[0])
+
+def l4Check(trans, path):
+	if trans[0] in l3:
+		return
+
+	if trans[0] in path:
+		return
+
+	path.append(trans)
+	if trans[0] not in l1:
+		return
+	else:
+		for t in tTable:
+			if trans[0] == t[2]:
+				l4Check(t)
+		l1.remove(trans[0])
+		l4.append(trans[0])
+
+
+def dfsAnalysis(curr, currentM, visited):
+
+	if curr == None:
+		return 
+
+	
+	global mIndex, mTable
+	
+	transitions = []
+	end = True
+	for trans in tTable:
+		if trans[2] == curr:
+			transitions.append(trans)
+			end = False
+	if end:
+		return
+
+	if curr in visited:
+		markNum = mIndex+1
+		for m in mTable:
+			if m[2]==transitions[0][3][1:]:
+				markNum = m[0]
+		mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
+			
+		#l4Check(curr, visited)
+		return
+
+
+	if len(transitions)>1:
+		if transitions[0][3] != transitions[1][3]:
+			markNum1 = mIndex+1
+			markNum2 = mIndex+2
+			mNum1Check = False
+			mNum2Check = False
+			for m in mTable:
+				if m[2]==transitions[0][3][1:]:
+					markNum1 = m[0]
+					mNum1Check = True
+				if m[2]==transitions[1][3][1:]:
+					markNum2 = m[0]
+					mNum2Check = True
+			mTable.append([currentM,transitions[0][2][1:],[transitions[0][3][1:],transitions[1][3][1:]],transitions[0][0],[markNum1,markNum2]])
+			if not mNum1Check:
+				mIndex+=1
+			if not mNum2Check:
+				mIndex+=1
+			visited.append(curr)
+			dfsAnalysis(transitions[0][3], markNum1, visited)
+			dfsAnalysis(transitions[1][3], markNum2, visited)
+		else:
+			markNum = mIndex+1
+			for m in mTable:
+				if m[2]==transitions[0][3][1:]:
+					markNum = m[0]
+			mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
+			mIndex+=1
+			visited.append(curr)
+			dfsAnalysis(transitions[0][3],mIndex, visited)
+	else:
+		markNum = mIndex+1
+		for m in mTable:
+			if m[2]==transitions[0][3][1:]:
+				markNum = m[3][1:]
+		mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
+		mIndex+=1
+		visited.append(curr)
+		dfsAnalysis(transitions[0][3],mIndex,visited)
+
+	
+def boundnessCheck():
+	if len(l3)>0 or len(l4)>0:
+		return 'false'
+	return 'true'
+
+def safeCheck(bounded):
+	if bounded:
+		return True
+	return False
+
+def livenessCheck():
+	liveness = 'False'
+	if len(l3)>0:
+		liveness =  'livelock'
+	if len(l4)>0:
+		liveness = 'quasi-live'
+	if len(l4)==len(tTable):
+		liveness = 'live'
+	return liveness
+
+def isEnd(mark):
+	for m in mTable:
+		if mark == m[0]:
+			return False
+	return True
+
+def reachabilityAnalysis(file):
+	global pTable, tTable
+	pTable, tTable = fileParse(file)
+
+	for t in tTable:
+		print('trans '+t[0]+' ... '+t[1])
+	
+	print()
+
+	print('M    P1  P2  Transition')
+	curr = pTable[0]
+	#trans = tTable[0]
+
+	dfsAnalysis(curr, 0, [])
+	for m in mTable:
+		#print(m)
+		if isinstance(m[2], list):
+			print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2][0])+','+str(m[2][1])+'   '+str(m[3])+'->M'+str(m[4][0])+',M'+str(m[4][1]))
+		else:	
+			if isEnd(m[4]):
+				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2]))
+				end = m[0]
+			else:
+				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2])+'   '+str(m[3])+'->M'+str(m[4]))
+
+	boundness = boundnessCheck()
+	liveness = livenessCheck()
+	safe = safeCheck(boundness)
+
+	print()
+	print('M'+str(end)+': final')
+	print()
+
+
+def main(file):
+	reachabilityAnalysis(file)
+
+if __name__ == "__main__":
+	file = sys.argv[1]
+	main(file)
