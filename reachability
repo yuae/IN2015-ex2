@@ -14,11 +14,9 @@ l4 = []
 
 def getStrInQuote(str):
 	#print(str)
-	text = re.search('"(.+?)"', str)
-	if text is None:
-		return ''
-	else:
-		return text.group(1)
+	text = re.findall('"(.+?)"', str)
+	#print(text)
+	return text[0]
 
 def fileParse(file):
 	pTable = []
@@ -172,7 +170,7 @@ def reachabilityAnalysis(file):
 	curr = pTable[0]
 	#trans = tTable[0]
 	end = ''
-	
+
 	dfsAnalysis(curr, 0, [])
 	for m in mTable:
 		#print(m)
