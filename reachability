@@ -171,7 +171,8 @@ def reachabilityAnalysis(file):
 	print('M    P1  P2  Transition')
 	curr = pTable[0]
 	#trans = tTable[0]
-
+	end = ''
+	
 	dfsAnalysis(curr, 0, [])
 	for m in mTable:
 		#print(m)
