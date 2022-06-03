@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import re
@@ -14,11 +14,8 @@ l4 = []
 
 def getStrInQuote(str):
 	#print(str)
-	text = re.findall('"(.+?)"', str)
-	if text is None:
-		pass
-	#print(text)
-	return text
+	return re.search('"(.+?)"', str).group(1)
+	#return text
 
 def fileParse(file):
 	pTable = []
@@ -28,16 +25,19 @@ def fileParse(file):
 	o = []
 	file = open(file)
 	for line in file:
+		#l = line.rstrip()
+		if len(line)<2:
+			continue
 		if 'place' in line.rstrip():
-			pTable.append(getStrInQuote(line)[0])
+			pTable.append(getStrInQuote(line))
 		if 'trans' in line.rstrip():
 			trans = line[:-1].split('~')
 			#print(trans[0])
 			#print(trans[1])
 		if 'in' in line.rstrip():
-			i = getStrInQuote(line)[0]
+			i = getStrInQuote(line)
 		if 'out' in line.rstrip():
-			o = getStrInQuote(line)[0]
+			o = getStrInQuote(line)
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
 	return pTable, tTable
 
@@ -169,7 +169,7 @@ def reachabilityAnalysis(file):
 	for t in tTable:
 		print('trans '+str(t[0])+' ... '+str(t[1]))
 	
-	print()
+	#print(tTable)
 
 	print('M    P1  P2  Transition')
 	curr = pTable[0]
