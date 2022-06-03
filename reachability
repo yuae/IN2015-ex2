@@ -15,7 +15,7 @@ l4 = []
 def getStrInQuote(str):
 	#print(str)
 	text = re.findall('"(.+?)"', str)
-	#print(text)
+	print(text)
 	return text
 
 def fileParse(file):
