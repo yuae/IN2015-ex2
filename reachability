@@ -13,29 +13,23 @@ l3 = []
 l4 = []
 
 def getStrInQuote(str):
-	#print(str)
-	text = re.findall('"(.+?)"', str)
-	print(text)
-	return text
+	return re.search('"(.+?)"', str).group(1)
 
 def fileParse(file):
 	pTable = []
 	tTable = []
-	trans = []	
+	transition = []	
 	i = []
 	o = []
 	file = open(file)
 	for line in file:
-		if 'place' in line.rstrip():
-			pTable.append(getStrInQuote(line)[0])
-		if 'trans' in line.rstrip():
+		text = line.rstrip()
+		if 'place' in text:
+			pTable.append(getStrInQuote(text))
+		if 'trans' in text:
 			trans = line[:-1].split('~')
-			#print(trans[0])
-			#print(trans[1])
-		if 'in' in line.rstrip():
-			i = getStrInQuote(line)[0]
-		if 'out' in line.rstrip():
-			o = getStrInQuote(line)[0]
+			i = getStrInQuote(file.readline().rstrip())
+			o = getStrInQuote(file.readline().rstrip())
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
 	return pTable, tTable
 
@@ -70,9 +64,9 @@ def dfsAnalysis(curr, currentM, visited):
 	if curr == None:
 		return 
 
-	
+
 	global mIndex, mTable
-	
+
 	transitions = []
 	end = True
 	for trans in tTable:
@@ -88,7 +82,7 @@ def dfsAnalysis(curr, currentM, visited):
 			if m[2]==transitions[0][3][1:]:
 				markNum = m[0]
 		mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
-			
+
 		#l4Check(curr, visited)
 		return
 
@@ -133,7 +127,7 @@ def dfsAnalysis(curr, currentM, visited):
 		visited.append(curr)
 		dfsAnalysis(transitions[0][3],mIndex,visited)
 
-	
+
 def boundnessCheck():
 	if len(l3)>0 or len(l4)>0:
 		return 'false'
@@ -165,14 +159,13 @@ def reachabilityAnalysis(file):
 	pTable, tTable = fileParse(file)
 
 	for t in tTable:
-		print('trans '+str(t[0])+' ... '+str(t[1]))
-	
+		print('trans '+t[0]+' ... '+t[1])
+
 	print()
 
 	print('M    P1  P2  Transition')
 	curr = pTable[0]
 	#trans = tTable[0]
-	end = ''
 
 	dfsAnalysis(curr, 0, [])
 	for m in mTable:
