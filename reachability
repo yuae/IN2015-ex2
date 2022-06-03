@@ -15,8 +15,7 @@ l4 = []
 def getStrInQuote(str):
 	#print(str)
 	text = re.findall('"(.+?)"', str)
-	print(text)
-	return text
+	return text[0]
 
 def fileParse(file):
 	pTable = []
@@ -31,6 +30,8 @@ def fileParse(file):
 			pTable.append(getStrInQuote(text))
 		if 'trans' in text:
 			trans = line[:-1].split('~')
+			print(trans[0])
+			print(trans[1])
 			i = getStrInQuote(file.readline().rstrip())
 			o = getStrInQuote(file.readline().rstrip())
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
