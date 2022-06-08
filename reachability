@@ -70,9 +70,7 @@ def dfsAnalysis(curr, currentM, visited):
 	if curr == None:
 		return 
 
-
 	global mIndex, mTable
-
 	transitions = []
 	end = True
 	for trans in tTable:
@@ -81,11 +79,10 @@ def dfsAnalysis(curr, currentM, visited):
 			end = False
 	if end:
 		return
-
 	if curr in visited:
 		markNum = mIndex+1
 		for m in mTable:
-			if m[2]==transitions[0][3][1:]:
+			if m[1]==transitions[0][3][1:]:
 				markNum = m[0]
 		mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
 
@@ -172,7 +169,7 @@ def reachabilityAnalysis(file):
 	print('M    P1  P2  Transition')
 	curr = pTable[0]
 	#trans = tTable[0]
-
+	endMarkings = []
 	dfsAnalysis(curr, 0, [])
 	for m in mTable:
 		#print(m)
@@ -181,7 +178,7 @@ def reachabilityAnalysis(file):
 		else:	
 			if isEnd(m[4]):
 				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2]))
-				end = m[0]
+				endMarkings.append(m[0])
 			else:
 				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2])+'   '+str(m[3])+'->M'+str(m[4]))
 
@@ -190,7 +187,8 @@ def reachabilityAnalysis(file):
 	safe = safeCheck(boundness)
 
 	print()
-	print('M'+str(end)+': final')
+	for e in endMarkings:
+		print('M'+str(e)+': final')
 	print()
 
 
