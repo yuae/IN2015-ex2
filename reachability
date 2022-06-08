@@ -202,7 +202,6 @@ def isEnd(mark):
 def reachabilityAnalysis(file):
 	global pTable, tTable
 	pTable, tTable = fileParse(file)
-	print(pTable)
 
 	for t in tTable:
 		print('trans '+str(t[0])+' ... '+str(t[1]))
