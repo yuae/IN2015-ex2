@@ -99,7 +99,7 @@ def traverse(curr, places, pTable, transitions, gates, tasks, edges):
 		[nGate, nItem]  = determineType(next, gates, tasks)
 		if not nGate:
 			pTable.append(['artPlace'+str(aplace), '"P'+str(p_count)+'"'])
-			places.append('place "P'+str(p_count)+';')
+			places.append('place "P'+str(p_count)+'";')
 			p_count+=1
 			if not pGate:
 				transitions.append({'id':curr.get('id'), 'index':str(t_count), 'label':curr.get('name'), 'in':'artPlace'+str((aplace-1)), 'out':'artPlace'+str(aplace)})

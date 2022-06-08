@@ -18,18 +18,24 @@ def getStrInQuote(str):
 def fileParse(file):
 	pTable = []
 	tTable = []
-	transition = []	
+	trans = []	
 	i = []
 	o = []
-	file = open(file)
+	file = open(file, encoding='utf-16')
 	for line in file:
 		text = line.rstrip()
-		if 'place' in text:
-			pTable.append(getStrInQuote(text))
-		if 'trans' in text:
-			trans = line[:-1].split('~')
-			i = getStrInQuote(file.readline().rstrip())
-			o = getStrInQuote(file.readline().rstrip())
+		if "place" in str(text):
+			r = getStrInQuote(text)
+			pTable.append(r)
+			continue
+		if 'trans' in str(text):
+			trans = text.split('~')
+			continue
+		if 'in' in str(text):
+			i = getStrInQuote(text)
+			continue
+		if 'out' in str(text):
+			o = getStrInQuote(text)
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
 	return pTable, tTable
 
@@ -100,7 +106,7 @@ def dfsAnalysis(curr, currentM, visited):
 				if m[2]==transitions[1][3][1:]:
 					markNum2 = m[0]
 					mNum2Check = True
-			mTable.append([currentM,transitions[0][2][1:],[transitions[0][3][1:],transitions[1][3][1:]],transitions[0][0],[markNum1,markNum2]])
+			mTable.append([currentM,transitions[0][2][1:],[transitions[0][3][1:],transitions[1][3][1:]],[transitions[0][0],transitions[1][0]],[markNum1,markNum2]])
 			if not mNum1Check:
 				mIndex+=1
 			if not mNum2Check:
@@ -159,7 +165,7 @@ def reachabilityAnalysis(file):
 	pTable, tTable = fileParse(file)
 
 	for t in tTable:
-		print('trans '+t[0]+' ... '+t[1])
+		print('trans '+str(t[0])+' ... '+str(t[1]))
 
 	print()
 
@@ -171,7 +177,7 @@ def reachabilityAnalysis(file):
 	for m in mTable:
 		#print(m)
 		if isinstance(m[2], list):
-			print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2][0])+','+str(m[2][1])+'   '+str(m[3])+'->M'+str(m[4][0])+',M'+str(m[4][1]))
+			print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2][0])+','+str(m[2][1])+'   '+str(m[3][0])+'->M'+str(m[4][0])+', '+str(m[3][1])+'->M'+str(m[4][1]))
 		else:	
 			if isEnd(m[4]):
 				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2]))
