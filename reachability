@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from operator import indexOf
 import sys
 import re
 
@@ -11,6 +12,7 @@ l1 = []
 l2 = []
 l3 = []
 l4 = []
+loop = False
 
 def getStrInQuote(str):
 	return re.search('"(.+?)"', str).group(1)
@@ -39,32 +41,6 @@ def fileParse(file):
 			tTable.append([getStrInQuote(trans[0]), getStrInQuote(trans[1]), i, o])
 	return pTable, tTable
 
-def liveLevelCheck(trans):
-	if len(trans[2])==1 and len(trans[3])==1:
-		l1.append(trans[0])
-	if len(trans[2])>1 and len(trans[3])==1:
-		l2.append(trans[0])
-	if len(trans[2])==1 and len(trans[3])>1:
-		l3.append(trans[0])
-
-def l4Check(trans, path):
-	if trans[0] in l3:
-		return
-
-	if trans[0] in path:
-		return
-
-	path.append(trans)
-	if trans[0] not in l1:
-		return
-	else:
-		for t in tTable:
-			if trans[0] == t[2]:
-				l4Check(t)
-		l1.remove(trans[0])
-		l4.append(trans[0])
-
-
 def dfsAnalysis(curr, currentM, visited):
 
 	if curr == None:
@@ -85,7 +61,8 @@ def dfsAnalysis(curr, currentM, visited):
 			if m[1]==transitions[0][3][1:]:
 				markNum = m[0]
 		mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
-
+		global loop
+		loop = True
 		#l4Check(curr, visited)
 		return
 
@@ -112,11 +89,13 @@ def dfsAnalysis(curr, currentM, visited):
 			dfsAnalysis(transitions[0][3], markNum1, visited)
 			dfsAnalysis(transitions[1][3], markNum2, visited)
 		else:
+			#print('parallel')
+			#print(curr)
 			markNum = mIndex+1
 			for m in mTable:
 				if m[2]==transitions[0][3][1:]:
 					markNum = m[0]
-			mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],transitions[0][0],markNum])
+			mTable.append([currentM,transitions[0][2][1:],transitions[0][3][1:],[transitions[0][0],transitions[1][0]],markNum])
 			mIndex+=1
 			visited.append(curr)
 			dfsAnalysis(transitions[0][3],mIndex, visited)
@@ -130,11 +109,39 @@ def dfsAnalysis(curr, currentM, visited):
 		visited.append(curr)
 		dfsAnalysis(transitions[0][3],mIndex,visited)
 
+def liveLevelCheck(trans):
+	if len(trans[2])==1 and len(trans[3])==1:
+		l1.append(trans[0])
+	if len(trans[2])>1 and len(trans[3])==1:
+		l2.append(trans[0])
+	if len(trans[2])==1 and len(trans[3])>1:
+		l3.append(trans[0])
+
+def l4Check(trans, path):
+	if trans[0] in l3:
+		return
+
+	if trans[0] in path:
+		return
+
+	path.append(trans)
+	if trans[0] not in l1:
+		return
+	else:
+		for t in tTable:
+			if trans[0] == t[2]:
+				l4Check(t)
+		l1.remove(trans[0])
+		l4.append(trans[0])
+
 
 def boundnessCheck():
-	if len(l3)>0 or len(l4)>0:
-		return 'false'
-	return 'true'
+	maxOut = 1
+	for m in mTable:
+		if isinstance(m[2],list):
+			if len(m[2])>maxOut:
+				maxOut = len(m[2])
+	return maxOut
 
 def safeCheck(bounded):
 	if bounded:
@@ -142,14 +149,49 @@ def safeCheck(bounded):
 	return False
 
 def livenessCheck():
-	liveness = 'False'
-	if len(l3)>0:
-		liveness =  'livelock'
-	if len(l4)>0:
-		liveness = 'quasi-live'
-	if len(l4)==len(tTable):
-		liveness = 'live'
-	return liveness
+	live = True
+	qLive = True
+	lLock = True
+	for m in mTable:
+		if m[4] == '':
+			live = False
+			qLive = False
+	if live:
+		for m in mTable:
+			if isinstance(m[2],list):
+				live = False
+			if isinstance(m[3], list):
+				if not isinstance(m[4],list):
+					qLive = False
+	else:
+		if loop:
+			lLock = True
+	return live, qLive, lLock
+
+def soundnessCheck():
+	pSoundness = True
+	tSoundness = True
+	for m in mTable:
+		if 'P'+str(m[1]) not in pTable:
+			pSoundness = False
+		if isinstance(m[2],list):
+			for p in m[2]:
+				if 'P'+str(p) not in pTable:
+					pSoundness = False
+		else:
+			if 'P'+str(m[2]) not in pTable:
+				pSoundness = False
+		if m[4] != '':
+			if isinstance(m[3],list):
+				for t in m[3]:
+					for trans in tTable:
+						if trans[0] != t:
+							tSoundness = False
+			else:
+				for trans in tTable:
+					if trans[0] != m[3]:
+						tSoundness = False	
+	return pSoundness, tSoundness
 
 def isEnd(mark):
 	for m in mTable:
@@ -160,6 +202,7 @@ def isEnd(mark):
 def reachabilityAnalysis(file):
 	global pTable, tTable
 	pTable, tTable = fileParse(file)
+	print(pTable)
 
 	for t in tTable:
 		print('trans '+str(t[0])+' ... '+str(t[1]))
@@ -173,23 +216,36 @@ def reachabilityAnalysis(file):
 	dfsAnalysis(curr, 0, [])
 	for m in mTable:
 		#print(m)
-		if isinstance(m[2], list):
-			print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2][0])+','+str(m[2][1])+'   '+str(m[3][0])+'->M'+str(m[4][0])+', '+str(m[3][1])+'->M'+str(m[4][1]))
+		if isinstance(m[3], list):
+			if isinstance(m[2],list):
+				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2][0])+','+str(m[2][1])+'   '+str(m[3][0])+'->M'+str(m[4][0])+', '+str(m[3][1])+'->M'+str(m[4][1]))
+			else:
+				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2])+'   '+str(m[3][0])+'->M'+str(m[4])+', '+str(m[3][1])+'->M'+str(m[4]))
 		else:	
 			if isEnd(m[4]):
 				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2]))
 				endMarkings.append(m[0])
 			else:
 				print('M'+str(m[0])+'    '+str(m[1])+'   '+str(m[2])+'   '+str(m[3])+'->M'+str(m[4]))
-
+	
+	for t in tTable:
+		liveLevelCheck(t)
 	boundness = boundnessCheck()
-	liveness = livenessCheck()
 	safe = safeCheck(boundness)
+	[live, quasi_live, live_lock] = livenessCheck()
+	#[place_soundness, trans_soundness] = soundnessCheck()
 
 	print()
 	for e in endMarkings:
 		print('M'+str(e)+': final')
-	print()
+	print('Bounded: '+str(boundness)+'-Bounded')
+	print('Safe: '+str(safe))
+	print('Live: '+str(live))
+	print('Quasi-live: '+str(quasi_live))
+	print('LiveLock: '+str(live_lock))
+	#if place_soundness and trans_soundness:
+		#print('Soundess: all places had tokens, all transitions fired at least once')
+
 
 
 def main(file):
