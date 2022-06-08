@@ -21,7 +21,7 @@ def fileParse(file):
 	trans = []	
 	i = []
 	o = []
-	file = open(file, encoding='utf-16')
+	file = open(file, encoding='utf-8')
 	for line in file:
 		text = line.rstrip()
 		if "place" in str(text):

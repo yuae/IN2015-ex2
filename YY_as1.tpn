@@ -1,16 +1,16 @@
-place P"0" init 1;
+place "P0" init 1;
 place "P1";
 place "P2";
-place "P3;
-place "P4;
-place "P5;
+place "P3";
+place "P4";
+place "P5";
 place "P6";
-place "P7;
+place "P7";
 place "P8";
 place "P9";
 place "P10";
 place "P11";
-place "P12;
+place "P12";
 place "P13";
 place "P14";
 trans "T1"~"intention to participate night run"
@@ -52,7 +52,7 @@ trans "T12"~"end timer"
 trans "T13"~"get running time"
    in "P12";
    out "P13";
-trans "T14"~""artificial transition""
+trans "T14"~"artificial transition"
    in "P13";
    out "P14";
 trans "T15"~"run"
@@ -61,9 +61,9 @@ trans "T15"~"run"
 trans "T16"~"leave directly form work"
    in "P8";
    out "P9";
-trans "T17"~""artificail transition""
+trans "T17"~"artificial transition"
    in "P6";
    out "P2";
-trans "T18"~""artificail transition""
+trans "T18"~"artificial transition"
    in "P1";
    out "P13";
